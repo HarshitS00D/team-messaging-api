@@ -3,6 +3,10 @@ const User = require('./schema').User;
 const Post = require('./schema').Post;
 const Channel = require('./schema').Channel;
 
+Router.get('/',(req,res) => {
+    res.send("working!");
+});
+
 Router.get('/get-user', async (req, res) => {
     await User.findOne({ _id: req.query.id }).then(result => {
         res.send(result);
