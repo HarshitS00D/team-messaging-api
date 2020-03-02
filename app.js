@@ -13,7 +13,7 @@ const app = express();
 const server = http.Server(app);
 const io = socketio(server);
 
-mongoose.connect('mongodb://localhost:27017/team-messaging', {
+mongoose.connect('mongodb+srv://harshitsood:harshit%4011@cluster0-u69rg.gcp.mongodb.net/team-messaging', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).catch(err => console.log(err));
