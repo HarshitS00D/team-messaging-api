@@ -42,25 +42,12 @@ const io = require('socket.io')(
 );
 
 io.on('connection', (socket) => {
-	socket.on('join', ({ userId, username, channelId }, callback) => {
+	socket.on('join', ({ userId, username, channelId }) => {
 		let rooms = _.omit(io.sockets.adapter.sids[socket.id], socket.id); //delete io.sockets.adapter.sids[socket.id][socket.id]
 		for (let room in rooms) socket.leave(room);
 		delete rooms;
 
 		socket.join(channelId);
-		console.log(username, io.sockets.adapter.sids[socket.id]);
-
-		// const { user } = addUser({ id: socket.id, userId, username, channelId });
-
-		// //console.log('user has joined !!!');
-
-		// socket.emit('message', { user: 'admin', text: ` Welcome to the channel ${user.username}` });
-		// socket.broadcast.to(user.channelId).emit('message', { user: 'admin', text: `${user.username}, has joined!` });
-
-		// //console.log(userId, username, channelId);
-		// socket.join(user.channelId);
-
-		// callback();
 	});
 
 	socket.on('new_message', (message, username, channelId, callback) => {
