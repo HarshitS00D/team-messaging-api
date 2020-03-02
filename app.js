@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const admin = require('os').userInfo().username;
 const Router = require('./router');
 const cors = require('cors');
 const _ = require('lodash');
@@ -11,10 +12,15 @@ const PORT = process.env.PORT || 4000;
 const app = express();
 
 mongoose
-	.connect('mongodb://localhost:27017/team-messaging', {
-		useNewUrlParser: true,
-		useUnifiedTopology: true
-	})
+	.connect(
+		admin === 'Harshit Sood'
+			? 'mongodb://localhost:27017/team-messaging'
+			: 'mongodb+srv://harshitsood:harshit%4011@cluster0-u69rg.gcp.mongodb.net/team-messaging',
+		{
+			useNewUrlParser: true,
+			useUnifiedTopology: true
+		}
+	)
 	.catch((err) => console.log(err));
 
 mongoose.connection.once('open', () => console.log('Connected to MongoDB')).on('error', (err) => console.log(err));
