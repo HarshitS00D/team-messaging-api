@@ -1,9 +1,20 @@
 const users = [];
 
 const addUser = ({ id, userId, username, channelId }) => {
+
+
+    for (let i = 0; i < users.length; i++) {
+        if (users[i].userId === userId && users[i].channelId === channelId) {
+            console.log('existing user');
+            let user = { id, userId, username, channelId };
+            return { user };
+        }
+    }
+
     const user = { id, userId, username, channelId };
 
     users.push(user);
+    console.log(users, "user added")
     return { user };
 }
 
