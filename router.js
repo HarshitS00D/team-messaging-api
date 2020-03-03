@@ -78,6 +78,17 @@ Router.get('/user/get-channels', (req, res) => {
 	});
 });
 
+Router.get('/user/get-posts', (req, res) => {
+	Channel.findOne({ _id: req.query.channelId })
+		.then((data) => {
+			res.send(data.posts);
+		})
+		.catch((err) => {
+			console.log(err);
+			res.send([]);
+		});
+});
+
 Router.post('/user/addUser', async (req, res) => {
 	let user = await User.findOne({ username: req.body.username });
 	if (user) {

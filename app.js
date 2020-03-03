@@ -4,8 +4,7 @@ const admin = require('os').userInfo().username;
 const Router = require('./router');
 const cors = require('cors');
 const _ = require('lodash');
-
-const { addUser, removeUser, getUser, getUsersInRoom } = require('./users');
+const Channel = require('./schema').Channel;
 
 const PORT = process.env.PORT || 4000;
 
@@ -53,7 +52,17 @@ io.on('connection', (socket) => {
 	socket.on('new_message', (message, username, channelId, callback) => {
 		//console.log(message, channelId);
 
-		io.to(channelId).emit('new_message_broadcast', { username, text: message });
+		Channel.findOne({ _id: channelId })
+			.then((result) => {
+				let time = Date();
+				let timestamp = time.substring(0, 25);
+
+				io.to(channelId).emit('new_message_broadcast', { username, message, timestamp });
+
+				result.posts.push({ message, username, timestamp });
+				result.save();
+			})
+			.catch((err) => console.log(err));
 
 		callback();
 	});
