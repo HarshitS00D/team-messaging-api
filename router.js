@@ -19,19 +19,36 @@ Router.get('/get-user', async (req, res) => {
 });
 
 Router.post('/register', async (req, res) => {
-	let user = new User({
-		email: req.body.email,
-		username: req.body.username,
-		password: req.body.password,
-		region: req.body.region
-	});
+	let result = await User.find({ $or: [ { email: req.body.email }, { username: req.body.username } ] });
+	if (result.length) {
+		if (result.length === 2) {
+			let username = 'Username already taken';
+			let email = 'Email already registered';
+			res.send({ error: { username, email } });
+		} else {
+			let username = undefined;
+			let email = undefined;
 
-	await user
-		.save()
-		.then((data) => {
-			res.send(data);
-		})
-		.catch((err) => console.log(err));
+			if (result[0].username === req.body.username) username = 'Username already taken!';
+			if (result[0].email === req.body.email) email = 'Email already Registered!';
+
+			res.send({ error: { username, email } });
+		}
+	} else {
+		let user = new User({
+			email: req.body.email,
+			username: req.body.username,
+			password: req.body.password,
+			region: req.body.region
+		});
+
+		await user
+			.save()
+			.then((data) => {
+				res.send(data);
+			})
+			.catch((err) => console.log(err));
+	}
 });
 
 Router.post('/login', async (req, res) => {
