@@ -11,14 +11,6 @@ const User = mongoose.Schema(
 	{ timestamps: true }
 );
 
-const Post = mongoose.Schema(
-	{
-		message: String,
-		createdBy: String
-	},
-	{ timestamps: true }
-);
-
 const Channel = mongoose.Schema(
 	{
 		name: String,
@@ -30,6 +22,16 @@ const Channel = mongoose.Schema(
 	{ timestamps: true }
 );
 
+const Invite = mongoose.Schema(
+	{
+		username: String,
+		channelId: String,
+		channelName: String,
+		sentBy: String
+	},
+	{ timestamps: true }
+);
+
 module.exports.Channel = mongoose.model('Channel', Channel);
-module.exports.Post = mongoose.model('Post', Post);
+module.exports.Invite = mongoose.model('Invite', Invite);
 module.exports.User = mongoose.model('User', User);

@@ -1,7 +1,7 @@
 const Router = require('express').Router();
 const User = require('./schema').User;
-const Post = require('./schema').Post;
 const Channel = require('./schema').Channel;
+const Invite = require('./schema').Invite;
 
 Router.get('/', (req, res) => {
 	res.send('server working');
@@ -106,27 +106,66 @@ Router.get('/user/get-posts', (req, res) => {
 		});
 });
 
-Router.post('/user/addUser', async (req, res) => {
+Router.get('/user/get-invites', (req, res) => {
+	Invite.find({ username: req.query.username }).then((result) => res.send(result)).catch((err) => {
+		console.log(err);
+		res.send([]);
+	});
+});
+
+Router.post('/user/invite', async (req, res) => {
 	let user = await User.findOne({ username: req.body.username });
 	if (user) {
 		let result = await User.findOne({
 			username: req.body.username,
 			'memberOfChannels.channelId': req.body.channelId
 		});
-
 		if (result) {
-			res.send({ message: 'user already exist' });
+			res.send({ message: 'User already exist!' });
 		} else {
-			user.memberOfChannels.push({ channelId: req.body.channelId });
-			await user.save();
+			let data = await Invite.findOne({ username: req.body.username, channelId: req.body.channelId });
+			if (data) {
+				res.send({ message: 'User already Invited!' });
+			} else {
+				let invite = new Invite({
+					username: req.body.username,
+					channelId: req.body.channelId,
+					channelName: req.body.channelName,
+					sentBy: req.body.sentBy
+				});
 
-			let channel = await Channel.findOne({ _id: req.body.channelId });
-			channel.members.push({ userId: user._id });
-			await channel.save();
-
-			res.send({ message: 'User added!' });
+				await invite.save().then((result) => res.send({ message: 'User Invited!' })).catch((err) => {
+					console.log(err);
+					res.send({ message: 'Error! please try again.' });
+				});
+			}
 		}
 	} else res.send({ message: 'User does not exist' });
+});
+
+Router.post('/user/accept-invite', async (req, res) => {
+	Invite.findOne({ _id: req.body.id }).then(async (result) => {
+		User.findOne({ username: req.body.username })
+			.then(async (user) => {
+				user.memberOfChannels.push({ channelId: result.channelId });
+				await user.save();
+				Channel.findOne({ _id: result.channelId })
+					.then(async (channel) => {
+						channel.members.push({ userId: user.__id });
+						await channel.save();
+					})
+					.catch((err) => console.log(err));
+			})
+			.catch((err) => console.log(err));
+	});
+
+	let result = await Invite.deleteOne({ _id: req.body.id });
+	res.send(result);
+});
+
+Router.post('/user/decline-invite', async (req, res) => {
+	let result = await Invite.deleteOne({ _id: req.body.id });
+	res.send(result);
 });
 
 module.exports = Router;
