@@ -16,7 +16,7 @@ const Channel = mongoose.Schema(
 		name: String,
 		description: String,
 		createdBy: String,
-		members: [ { userId: String } ],
+		members: [ { username: String } ],
 		posts: [ { message: String, username: String, timestamp: String } ]
 	},
 	{ timestamps: true }

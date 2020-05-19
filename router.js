@@ -65,14 +65,14 @@ Router.post('/create-channel', async (req, res) => {
 		name: req.body.name,
 		description: req.body.description,
 		createdBy: req.body.createdBy,
-		members: [ { userId: req.body.createdBy } ],
+		members: [ { username: req.body.createdBy } ],
 		posts: []
 	});
 
 	await channel
 		.save()
 		.then((data) => {
-			User.findOne({ _id: req.body.createdBy }).then((result) => {
+			User.findOne({ username: req.body.createdBy }).then((result) => {
 				result.memberOfChannels.push({ channelId: data._id });
 				result.save();
 			});
@@ -151,7 +151,7 @@ Router.post('/user/accept-invite', async (req, res) => {
 				await user.save();
 				Channel.findOne({ _id: result.channelId })
 					.then(async (channel) => {
-						channel.members.push({ userId: user.__id });
+						channel.members.push({ username: user.username });
 						await channel.save();
 					})
 					.catch((err) => console.log(err));
@@ -165,6 +165,47 @@ Router.post('/user/accept-invite', async (req, res) => {
 
 Router.post('/user/decline-invite', async (req, res) => {
 	let result = await Invite.deleteOne({ _id: req.body.id });
+	res.send(result);
+});
+
+Router.get('/trending', async (req, res) => {
+	let result = await Channel.aggregate([
+		{
+			$project: {
+				name: 1,
+				description: 1,
+				post_count: { $size: { $ifNull: [ '$posts', [] ] } }
+			}
+		},
+		{
+			$sort: { post_count: -1 }
+		},
+		{
+			$limit: 5
+		}
+	]);
+	res.send(result);
+});
+
+Router.get('/trending/users', async (req, res) => {
+	let result = await Channel.aggregate([
+		{
+			$project: { posts: 1 }
+		},
+		{
+			$unwind: '$posts'
+		},
+		{
+			$group: { _id: '$posts.username', count: { $sum: 1 } }
+		},
+		{
+			$sort: { count: -1 }
+		},
+		{
+			$limit: 5
+		}
+	]);
+
 	res.send(result);
 });
 
