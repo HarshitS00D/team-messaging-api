@@ -82,6 +82,17 @@ Router.post('/create-channel', async (req, res) => {
 		.catch((err) => console.log(err));
 });
 
+Router.get('/channel/members', (req, res) => {
+	Channel.findOne({ _id: req.query._id })
+		.then((data) => {
+			res.send(data.members);
+		})
+		.catch((err) => {
+			console.log(err);
+			res.send([]);
+		});
+});
+
 Router.get('/user/get-channels', (req, res) => {
 	User.findOne({ _id: req.query.id }).then(async (data) => {
 		let resArray = [];
