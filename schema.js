@@ -6,7 +6,7 @@ const User = mongoose.Schema(
 		username: String,
 		password: String,
 		region: String,
-		memberOfChannels: [ { channelId: String } ]
+		memberOfChannels: [ { _id: false, channelId: String } ]
 	},
 	{ timestamps: true }
 );
@@ -16,8 +16,8 @@ const Channel = mongoose.Schema(
 		name: String,
 		description: String,
 		createdBy: String,
-		members: [ { username: String } ],
-		posts: [ { message: String, username: String, timestamp: String } ]
+		members: [ { _id: false, username: String } ],
+		posts: [ { _id: false, message: String, username: String, timestamp: String } ]
 	},
 	{ timestamps: true }
 );

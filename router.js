@@ -179,6 +179,22 @@ Router.post('/user/decline-invite', async (req, res) => {
 	res.send(result);
 });
 
+Router.post('/user/leave-channel', async (req, res) => {
+	await User.findOne({ username: req.body.username })
+		.then(async (user) => {
+			user.memberOfChannels.pull({ channelId: req.body.channelId });
+			await user.save();
+
+			await Channel.findOne({ _id: req.body.channelId })
+				.then(async (channel) => {
+					channel.members.pull({ username: req.body.username });
+					await channel.save().then((result) => res.send(result)).catch((err) => console.log(err));
+				})
+				.catch((err) => console.log(err));
+		})
+		.catch((err) => console.log(err));
+});
+
 Router.get('/trending', async (req, res) => {
 	let result = await Channel.aggregate([
 		{
